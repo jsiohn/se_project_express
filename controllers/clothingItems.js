@@ -42,18 +42,19 @@ const createItem = (req, res) => {
 //DELETE /items/:itemId
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
-  console.log(itemId);
 
   if (!mongoose.Types.ObjectId.isValid(itemId)) {
-    return res.status(notFoundCode).send({ message: "Invalid ItemId" });
+    return res.status(badRequestCode).send({ message: "Invalid ItemId" });
   }
+
+  console.log(itemId);
   return ClothingItem.findByIdAndDelete(itemId)
     .orFail()
     .then((item) => res.status(okCode).send(item))
     .catch((err) => {
       console.log(err.name);
       if (err.name === "DocumentNotFoundError") {
-        return res.status(badRequestCode).send({ message: err.message });
+        return res.status(notFoundCode).send({ message: err.message });
       }
       return res.status(internalServerError).send({ message: err.message });
     });
@@ -73,10 +74,12 @@ const updateItem = (req, res) => {
     });
 };
 
-//LIKES-DISLIKES
+//LIKES
 const likeItem = (req, res) => {
+  const { itemId } = req.params;
+
   if (!mongoose.Types.ObjectId.isValid(itemId)) {
-    return res.status(notFoundCode).send({ message: "Invalid ItemId" });
+    return res.status(badRequestCode).send({ message: "Invalid ItemId" });
   }
   return ClothingItem.findByIdAndUpdate(
     req.params.itemId,
@@ -89,16 +92,16 @@ const likeItem = (req, res) => {
       console.log(err.name);
       if (err.name === "DocumentNotFoundError") {
         return res.status(notFoundCode).send({ message: err.message });
-      } else if (err.name === "CastError") {
-        return res.status(badRequestCode).send({ message: err.message });
       }
       return res.status(internalServerError).send({ message: err.message });
     });
 };
 
 const dislikeItem = (req, res) => {
+  const { itemId } = req.params;
+
   if (!mongoose.Types.ObjectId.isValid(itemId)) {
-    return res.status(notFoundCode).send({ message: "Invalid ItemId" });
+    return res.status(badRequestCode).send({ message: "Invalid ItemId" });
   }
   return ClothingItem.findByIdAndUpdate(
     req.params.itemId,
@@ -111,8 +114,6 @@ const dislikeItem = (req, res) => {
       console.log(err.name);
       if (err.name === "DocumentNotFoundError") {
         return res.status(notFoundCode).send({ message: err.message });
-      } else if (err.name === "CastError") {
-        return res.status(badRequestCode).send({ message: err.message });
       }
       return res.status(internalServerError).send({ message: err.message });
     });
