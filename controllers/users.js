@@ -2,7 +2,7 @@ const User = require("../models/user");
 const {
   okCode,
   createdCode,
-  noContentCode,
+  //noContentCode,
   badRequestCode,
   notFoundCode,
   internalServerError,
@@ -39,7 +39,8 @@ const getUser = (req, res) => {
       console.error(err);
       if (err.name === "DocumentNotFoundError") {
         return res.status(notFoundCode).send({ message: err.message });
-      } else if (err.name === "CastError") {
+      }
+      if (err.name === "CastError") {
         return res.status(badRequestCode).send({ message: err.message });
       }
       return res.status(internalServerError).send({ message: err.message });

@@ -2,14 +2,14 @@ const mongoose = require("mongoose");
 const ClothingItem = require("../models/clothingItem");
 const {
   okCode,
-  createdCode,
-  noContentCode,
+  //createdCode,
+  //noContentCode,
   badRequestCode,
   notFoundCode,
   internalServerError,
 } = require("../utils/errors");
 
-//GET /items
+// GET /items
 const getItems = (req, res) => {
   ClothingItem.find({})
     .then((items) => res.status(okCode).send(items))
@@ -19,7 +19,7 @@ const getItems = (req, res) => {
     });
 };
 
-//POST /items
+// POST /items
 const createItem = (req, res) => {
   // console.log(req.user._id);
   const { name, weather, imageUrl } = req.body;
@@ -39,7 +39,7 @@ const createItem = (req, res) => {
     });
 };
 
-//DELETE /items/:itemId
+// DELETE /items/:itemId
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
 
@@ -60,7 +60,7 @@ const deleteItem = (req, res) => {
     });
 };
 
-//UPDATE
+// UPDATE
 const updateItem = (req, res) => {
   const { itemId } = req.params;
   const { imageUrl } = req.body;
@@ -74,7 +74,7 @@ const updateItem = (req, res) => {
     });
 };
 
-//LIKES
+// LIKES
 const likeItem = (req, res) => {
   const { itemId } = req.params;
 
@@ -97,6 +97,7 @@ const likeItem = (req, res) => {
     });
 };
 
+// DISLIKES
 const dislikeItem = (req, res) => {
   const { itemId } = req.params;
 
