@@ -2,8 +2,8 @@ const mongoose = require("mongoose");
 const ClothingItem = require("../models/clothingItem");
 const {
   okCode,
-  //createdCode,
-  //noContentCode,
+  // createdCode,
+  // noContentCode,
   badRequestCode,
   notFoundCode,
   internalServerError,
