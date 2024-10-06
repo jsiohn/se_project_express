@@ -2,8 +2,6 @@ const mongoose = require("mongoose");
 const ClothingItem = require("../models/clothingItem");
 const {
   okCode,
-  // createdCode,
-  // noContentCode,
   badRequestCode,
   notFoundCode,
   internalServerError,
@@ -15,13 +13,14 @@ const getItems = (req, res) => {
     .then((items) => res.status(okCode).send(items))
     .catch((err) => {
       console.log(err.name);
-      return res.status(internalServerError).send({ message: err.message });
+      return res
+        .status(internalServerError)
+        .send({ message: "An error has occurred on the server" });
     });
 };
 
 // POST /items
 const createItem = (req, res) => {
-  // console.log(req.user._id);
   const { name, weather, imageUrl } = req.body;
   const owner = req.user._id;
 
@@ -33,9 +32,11 @@ const createItem = (req, res) => {
     .catch((err) => {
       console.log(err.name);
       if (err.name === "ValidationError") {
-        return res.status(badRequestCode).send({ message: err.message });
+        return res.status(badRequestCode).send({ message: "Invalid data" });
       }
-      return res.status(internalServerError).send({ message: err.message });
+      return res
+        .status(internalServerError)
+        .send({ message: "An error has occurred on the server" });
     });
 };
 
@@ -44,7 +45,7 @@ const deleteItem = (req, res) => {
   const { itemId } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(itemId)) {
-    return res.status(badRequestCode).send({ message: "Invalid ItemId" });
+    return res.status(badRequestCode).send({ message: "Invalid data" });
   }
 
   console.log(itemId);
@@ -56,21 +57,9 @@ const deleteItem = (req, res) => {
       if (err.name === "DocumentNotFoundError") {
         return res.status(notFoundCode).send({ message: err.message });
       }
-      return res.status(internalServerError).send({ message: err.message });
-    });
-};
-
-// UPDATE
-const updateItem = (req, res) => {
-  const { itemId } = req.params;
-  const { imageUrl } = req.body;
-
-  ClothingItem.findByIdAndUpdate(itemId, { $set: { imageUrl } })
-    .orFail()
-    .then((item) => res.status(okCode).send({ data: item }))
-    .catch((err) => {
-      console.log(err.name);
-      return res.status(internalServerError).send({ message: err.message });
+      return res
+        .status(internalServerError)
+        .send({ message: "An error has occurred on the server" });
     });
 };
 
@@ -79,7 +68,7 @@ const likeItem = (req, res) => {
   const { itemId } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(itemId)) {
-    return res.status(badRequestCode).send({ message: "Invalid ItemId" });
+    return res.status(badRequestCode).send({ message: "Invalid data" });
   }
   return ClothingItem.findByIdAndUpdate(
     req.params.itemId,
@@ -93,7 +82,9 @@ const likeItem = (req, res) => {
       if (err.name === "DocumentNotFoundError") {
         return res.status(notFoundCode).send({ message: err.message });
       }
-      return res.status(internalServerError).send({ message: err.message });
+      return res
+        .status(internalServerError)
+        .send({ message: "An error has occurred on the server" });
     });
 };
 
@@ -102,7 +93,7 @@ const dislikeItem = (req, res) => {
   const { itemId } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(itemId)) {
-    return res.status(badRequestCode).send({ message: "Invalid ItemId" });
+    return res.status(badRequestCode).send({ message: "Invalid data" });
   }
   return ClothingItem.findByIdAndUpdate(
     req.params.itemId,
@@ -116,7 +107,9 @@ const dislikeItem = (req, res) => {
       if (err.name === "DocumentNotFoundError") {
         return res.status(notFoundCode).send({ message: err.message });
       }
-      return res.status(internalServerError).send({ message: err.message });
+      return res
+        .status(internalServerError)
+        .send({ message: "An error has occurred on the server" });
     });
 };
 
@@ -124,7 +117,6 @@ module.exports = {
   getItems,
   createItem,
   deleteItem,
-  updateItem,
   likeItem,
   dislikeItem,
 };
