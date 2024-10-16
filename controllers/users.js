@@ -8,6 +8,7 @@ const {
   notFoundCode,
   internalServerError,
 } = require("../utils/errors");
+const { JWT_SECRET } = require("../utils/config");
 
 const getUsers = (req, res) => {
   User.find({})
@@ -61,14 +62,16 @@ const login = (req, res) => {
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      // authentication successful! user is in the user variable
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+        expiresIn: "7d",
+      });
+      res.send({ token });
     })
     .catch((err) => {
-      // authentication error
       res
         .status(invalidCredentialsCode)
         .send({ message: "Invalid credentials" });
     });
 };
 
-module.exports = { getUsers, createUser, getUser };
+module.exports = { getUsers, createUser, getUser, login };
