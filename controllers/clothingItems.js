@@ -5,6 +5,7 @@ const {
   badRequestCode,
   notFoundCode,
   internalServerError,
+  forbidden,
 } = require("../utils/errors");
 
 // GET /items
@@ -49,9 +50,18 @@ const deleteItem = (req, res) => {
   }
 
   console.log(itemId);
-  return ClothingItem.findByIdAndDelete(itemId)
+  return ClothingItem.findById(itemId)
     .orFail()
-    .then((item) => res.status(okCode).send(item))
+    .then((item) => {
+      if (!item.owner.equals(req.user._id)) {
+        return res
+          .status(forbidden)
+          .send({ message: "You are not authorized to delete this item" });
+      }
+      return item
+        .deleteOne()
+        .then(() => res.send({ message: "Item successfully deleted" }));
+    })
     .catch((err) => {
       console.log(err.name);
       if (err.name === "DocumentNotFoundError") {

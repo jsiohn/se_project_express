@@ -8,6 +8,8 @@ const badRequestCode = 400;
 
 const invalidCredentialsCode = 401;
 
+const forbidden = 403;
+
 const notFoundCode = 404;
 
 const internalServerError = 500;
@@ -18,6 +20,7 @@ module.exports = {
   noContentCode,
   badRequestCode,
   invalidCredentialsCode,
+  forbidden,
   notFoundCode,
   internalServerError,
 };
