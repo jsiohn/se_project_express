@@ -12,6 +12,8 @@ const forbidden = 403;
 
 const notFoundCode = 404;
 
+const conflictCode = 409;
+
 const internalServerError = 500;
 
 module.exports = {
@@ -22,5 +24,6 @@ module.exports = {
   invalidCredentialsCode,
   forbidden,
   notFoundCode,
+  conflictCode,
   internalServerError,
 };

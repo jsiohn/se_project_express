@@ -7,60 +7,55 @@ const {
   badRequestCode,
   invalidCredentialsCode,
   notFoundCode,
+  conflictCode,
   internalServerError,
 } = require("../utils/errors");
 const { JWT_SECRET } = require("../utils/config");
-const validator = require("validator");
-
-// const getUsers = (req, res) => {
-//   User.find({})
-//     .then((users) => res.status(okCode).send(users))
-//     .catch((err) => {
-//       console.error(err);
-//       return res
-//         .status(internalServerError)
-//         .send({ message: "An error has occurred on the server" });
-//     });
-// };
+// const validator = require("validator");
 
 const createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
-  bcrypt
-    .hash(req.body.password, 10)
-    .then((hash) => User.create({ name, avatar, email, password }))
-    .then((user) => res.status(createdCode).send(user))
-    .catch((err) => {
-      console.error(err);
-      if (err.name === "ValidationError") {
-        return res.status(badRequestCode).send({ message: "Invalid data" });
-      }
-      return res
-        .status(internalServerError)
-        .send({ message: "An error has occurred on the server" });
-    });
-};
 
-// const getUser = (req, res) => {
-//   const { userId } = req.params;
-//   User.findById(userId)
-//     .orFail()
-//     .then((user) => res.status(okCode).send(user))
-//     .catch((err) => {
-//       console.error(err);
-//       if (err.name === "DocumentNotFoundError") {
-//         return res.status(notFoundCode).send({ message: err.message });
-//       }
-//       if (err.name === "CastError") {
-//         return res.status(badRequestCode).send({ message: "Invalid data" });
-//       }
-//       return res
-//         .status(internalServerError)
-//         .send({ message: "An error has occurred on the server" });
-//     });
-// };
+  if (!email || !password) {
+    return res
+      .status(badRequestCode)
+      .send({ message: "Both email and password fields are required" });
+  }
+
+  return User.findOne({ email }).then((user) => {
+    if (user) {
+      res.status(conflictCode).send({ message: "This user already exists" });
+    }
+
+    return bcrypt
+      .hash(password, 10)
+      .then((hash) => User.create({ name, avatar, email, password: hash }))
+      .then((user) => {
+        const userWithoutPassword = user.toObject();
+        delete userWithoutPassword.password;
+        res.status(createdCode).send(userWithoutPassword);
+      })
+      .catch((err) => {
+        console.error(err);
+        if (err.name === "ValidationError") {
+          return res.status(badRequestCode).send({ message: "Invalid data" });
+        }
+        return res
+          .status(internalServerError)
+          .send({ message: "An error has occurred on the server" });
+      });
+  });
+};
 
 const login = (req, res) => {
   const { email, password } = req.body;
+  console.log(email, password);
+
+  if (!email || !password) {
+    return res
+      .status(badRequestCode)
+      .send({ message: "Both email and password fields are required" });
+  }
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
@@ -70,6 +65,7 @@ const login = (req, res) => {
       res.send({ token });
     })
     .catch((err) => {
+      console.log(err);
       res
         .status(invalidCredentialsCode)
         .send({ message: "Invalid credentials" });
@@ -82,7 +78,7 @@ const getCurrentUser = (req, res) => {
     .orFail()
     .then((user) => {
       const { _id, email, avatar, name } = user;
-      res.status(okCode).send(user);
+      res.status(okCode).send({ _id, email, avatar, name });
     })
     .catch((err) => {
       console.error(err);
