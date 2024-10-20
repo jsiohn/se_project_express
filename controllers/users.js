@@ -22,29 +22,32 @@ const createUser = (req, res) => {
       .send({ message: "Both email and password fields are required" });
   }
 
-  return User.findOne({ email }).then((user) => {
-    if (user) {
-      res.status(conflictCode).send({ message: "This user already exists" });
-    }
-
-    return bcrypt
-      .hash(password, 10)
-      .then((hash) => User.create({ name, avatar, email, password: hash }))
-      .then((user) => {
-        res
-          .status(createdCode)
-          .send({ name: user.name, avatar: user.avatar, email: user.email });
-      })
-      .catch((err) => {
-        console.error(err);
-        if (err.name === "ValidationError") {
-          return res.status(badRequestCode).send({ message: "Invalid data" });
-        }
+  return User.findOne({ email })
+    .then((user) => {
+      if (user) {
         return res
-          .status(internalServerError)
-          .send({ message: "An error has occurred on the server" });
-      });
-  });
+          .status(conflictCode)
+          .send({ message: "This user already exists" });
+      }
+
+      return bcrypt
+        .hash(password, 10)
+        .then((hash) => User.create({ name, avatar, email, password: hash }));
+    })
+    .then((user) => {
+      res
+        .status(createdCode)
+        .send({ name: user.name, avatar: user.avatar, email: user.email });
+    })
+    .catch((err) => {
+      console.error(err);
+      if (err.name === "ValidationError") {
+        return res.status(badRequestCode).send({ message: "Invalid data" });
+      }
+      return res
+        .status(internalServerError)
+        .send({ message: "An error has occurred on the server" });
+    });
 };
 
 const login = (req, res) => {
@@ -66,9 +69,14 @@ const login = (req, res) => {
     })
     .catch((err) => {
       console.log(err);
-      res
-        .status(invalidCredentialsCode)
-        .send({ message: "Invalid credentials" });
+      if (err.message === "Invalid email or password") {
+        return res
+          .status(invalidCredentialsCode)
+          .send({ message: "Invalid credentials" });
+      }
+      return res
+        .status(internalServerError)
+        .send({ message: "An error has occurred on the server" });
     });
 };
 
