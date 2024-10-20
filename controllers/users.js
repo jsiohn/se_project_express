@@ -32,12 +32,12 @@ const createUser = (req, res) => {
 
       return bcrypt
         .hash(password, 10)
-        .then((hash) => User.create({ name, avatar, email, password: hash }));
-    })
-    .then((user) => {
-      res
-        .status(createdCode)
-        .send({ name: user.name, avatar: user.avatar, email: user.email });
+        .then((hash) => User.create({ name, avatar, email, password: hash }))
+        .then((user) => {
+          res
+            .status(createdCode)
+            .send({ name: user.name, avatar: user.avatar, email: user.email });
+        });
     })
     .catch((err) => {
       console.error(err);
@@ -69,7 +69,7 @@ const login = (req, res) => {
     })
     .catch((err) => {
       console.log(err);
-      if (err.message === "Invalid email or password") {
+      if (err.message === "Incorrect email or password") {
         return res
           .status(invalidCredentialsCode)
           .send({ message: "Invalid credentials" });
