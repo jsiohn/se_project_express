@@ -3,10 +3,16 @@ const ClothingItem = require("../models/clothingItem");
 const {
   okCode,
   badRequestCode,
-  notFoundCode,
-  internalServerError,
-  forbidden,
+  // notFoundCode,
+  // internalServerError,
+  // forbidden,
 } = require("../utils/errors");
+
+const NotFoundError = require("../errors/not-found-err");
+// const ConflictError = require("../errors/conflict-err");
+const BadRequestError = require("../errors/bad-request-err");
+const ForbiddenError = require("../errors/forbidden-err");
+// const UnauthorizedError = require("../errors/unauthorized-err");
 
 // GET /items
 const getItems = (req, res) => {
@@ -14,9 +20,10 @@ const getItems = (req, res) => {
     .then((items) => res.status(okCode).send(items))
     .catch((err) => {
       console.log(err.name);
-      return res
-        .status(internalServerError)
-        .send({ message: "An error has occurred on the server" });
+      next(err);
+      // return res
+      //   .status(internalServerError)
+      //   .send({ message: "An error has occurred on the server" });
     });
 };
 
@@ -33,11 +40,13 @@ const createItem = (req, res) => {
     .catch((err) => {
       console.log(err.name);
       if (err.name === "ValidationError") {
-        return res.status(badRequestCode).send({ message: "Invalid data" });
+        next(new BadRequestError("Invalid data"));
+        // return res.status(badRequestCode).send({ message: "Invalid data" });
       }
-      return res
-        .status(internalServerError)
-        .send({ message: "An error has occurred on the server" });
+      next(err);
+      // return res
+      //   .status(internalServerError)
+      //   .send({ message: "An error has occurred on the server" });
     });
 };
 
@@ -54,9 +63,10 @@ const deleteItem = (req, res) => {
     .orFail()
     .then((item) => {
       if (!item.owner.equals(req.user._id)) {
-        return res
-          .status(forbidden)
-          .send({ message: "You are not authorized to delete this item" });
+        next(new ForbiddenError("You are not authorized to delete this item"));
+        // return res
+        //   .status(forbidden)
+        //   .send({ message: "You are not authorized to delete this item" });
       }
       return item
         .deleteOne()
@@ -65,11 +75,13 @@ const deleteItem = (req, res) => {
     .catch((err) => {
       console.log(err.name);
       if (err.name === "DocumentNotFoundError") {
-        return res.status(notFoundCode).send({ message: err.message });
+        next(new NotFoundError("Item not found"));
+        // return res.status(notFoundCode).send({ message: err.message });
       }
-      return res
-        .status(internalServerError)
-        .send({ message: "An error has occurred on the server" });
+      next(err);
+      // return res
+      //   .status(internalServerError)
+      //   .send({ message: "An error has occurred on the server" });
     });
 };
 
@@ -78,7 +90,8 @@ const likeItem = (req, res) => {
   const { itemId } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(itemId)) {
-    return res.status(badRequestCode).send({ message: "Invalid data" });
+    next(new BadRequestError("Invalid data"));
+    // return res.status(badRequestCode).send({ message: "Invalid data" });
   }
   return ClothingItem.findByIdAndUpdate(
     req.params.itemId,
@@ -90,11 +103,13 @@ const likeItem = (req, res) => {
     .catch((err) => {
       console.log(err.name);
       if (err.name === "DocumentNotFoundError") {
-        return res.status(notFoundCode).send({ message: err.message });
+        next(new NotFoundError("Item not found"));
+        // return res.status(notFoundCode).send({ message: err.message });
       }
-      return res
-        .status(internalServerError)
-        .send({ message: "An error has occurred on the server" });
+      next(err);
+      // return res
+      //   .status(internalServerError)
+      //   .send({ message: "An error has occurred on the server" });
     });
 };
 
@@ -103,7 +118,8 @@ const dislikeItem = (req, res) => {
   const { itemId } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(itemId)) {
-    return res.status(badRequestCode).send({ message: "Invalid data" });
+    next(new BadRequestError("Invalid data"));
+    // return res.status(badRequestCode).send({ message: "Invalid data" });
   }
   return ClothingItem.findByIdAndUpdate(
     req.params.itemId,
@@ -115,11 +131,13 @@ const dislikeItem = (req, res) => {
     .catch((err) => {
       console.log(err.name);
       if (err.name === "DocumentNotFoundError") {
-        return res.status(notFoundCode).send({ message: err.message });
+        next(new NotFoundError("Item not found"));
+        // return res.status(notFoundCode).send({ message: err.message });
       }
-      return res
-        .status(internalServerError)
-        .send({ message: "An error has occurred on the server" });
+      next(err);
+      // return res
+      //   .status(internalServerError)
+      //   .send({ message: "An error has occurred on the server" });
     });
 };
 
