@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const ClothingItem = require("../models/clothingItem");
 const {
   okCode,
-  badRequestCode,
+  // badRequestCode,
   // notFoundCode,
   // internalServerError,
   // forbidden,
@@ -15,7 +15,7 @@ const ForbiddenError = require("../errors/forbidden-err");
 // const UnauthorizedError = require("../errors/unauthorized-err");
 
 // GET /items
-const getItems = (req, res) => {
+const getItems = (req, res, next) => {
   ClothingItem.find({})
     .then((items) => res.status(okCode).send(items))
     .catch((err) => {
@@ -28,7 +28,7 @@ const getItems = (req, res) => {
 };
 
 // POST /items
-const createItem = (req, res) => {
+const createItem = (req, res, next) => {
   const { name, weather, imageUrl } = req.body;
   const owner = req.user._id;
 
@@ -51,11 +51,12 @@ const createItem = (req, res) => {
 };
 
 // DELETE /items/:itemId
-const deleteItem = (req, res) => {
+const deleteItem = (req, res, next) => {
   const { itemId } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(itemId)) {
-    return res.status(badRequestCode).send({ message: "Invalid data" });
+    return next(new BadRequestError("Invalid data"));
+    // return res.status(badRequestCode).send({ message: "Invalid data" });
   }
 
   console.log(itemId);
@@ -63,7 +64,9 @@ const deleteItem = (req, res) => {
     .orFail()
     .then((item) => {
       if (!item.owner.equals(req.user._id)) {
-        next(new ForbiddenError("You are not authorized to delete this item"));
+        return next(
+          new ForbiddenError("You are not authorized to delete this item")
+        );
         // return res
         //   .status(forbidden)
         //   .send({ message: "You are not authorized to delete this item" });
@@ -86,7 +89,7 @@ const deleteItem = (req, res) => {
 };
 
 // LIKES
-const likeItem = (req, res) => {
+const likeItem = (req, res, next) => {
   const { itemId } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(itemId)) {
@@ -114,7 +117,7 @@ const likeItem = (req, res) => {
 };
 
 // DISLIKES
-const dislikeItem = (req, res) => {
+const dislikeItem = (req, res, next) => {
   const { itemId } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(itemId)) {

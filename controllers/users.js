@@ -18,7 +18,7 @@ const BadRequestError = require("../errors/bad-request-err");
 // const ForbiddenError = require("../errors/forbidden-err");
 const UnauthorizedError = require("../errors/unauthorized-err");
 
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   const { name, avatar, email, password } = req.body;
 
   if (!email || !password) {
@@ -31,7 +31,7 @@ const createUser = (req, res) => {
   return User.findOne({ email })
     .then((user) => {
       if (user) {
-        next(new ConflictError("This user already exists"));
+        return next(new ConflictError("This user already exists"));
         // return res
         //   .status(conflictCode)
         //   .send({ message: "This user already exists" });
@@ -62,7 +62,7 @@ const createUser = (req, res) => {
     });
 };
 
-const login = (req, res) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
   console.log(email, password);
 
@@ -96,7 +96,7 @@ const login = (req, res) => {
     });
 };
 
-const getCurrentUser = (req, res) => {
+const getCurrentUser = (req, res, next) => {
   const id = req.user._id;
   User.findById(id)
     .orFail()
@@ -121,7 +121,7 @@ const getCurrentUser = (req, res) => {
     });
 };
 
-const updateProfile = (req, res) => {
+const updateProfile = (req, res, next) => {
   const { name, avatar } = req.body;
   return User.findByIdAndUpdate(
     req.user._id,
